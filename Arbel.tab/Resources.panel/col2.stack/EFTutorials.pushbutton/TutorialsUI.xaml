@@ -1,0 +1,685 @@
+<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="MainWindow" Height="760" Width="800"
+    WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+    WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <!-- Define DataTemplate for Video Content -->
+        <DataTemplate x:Key="VideoTemplate">
+            <Border Style="{StaticResource EF_card}">
+                <StackPanel>
+                    <!-- Video Thumbnail Image -->
+                    <Image Source="{Binding VideoThumbnailUrl}" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                    <!-- Video Title -->
+                    <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                    <!-- Watch Here Hyperlink -->
+                    <TextBlock HorizontalAlignment="Center">
+                    <Hyperlink NavigateUri="{Binding VideoUrl}" RequestNavigate="Hyperlink_RequestNavigate">
+                        <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                    </Hyperlink>
+                </TextBlock>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <!-- Style for Video Content Card -->
+        <Style x:Key="EF_card" TargetType="Border">
+            <Setter Property="Background" Value="#393939"/>
+            <Setter Property="CornerRadius" Value="7"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="BorderBrush" Value="#FF9A2E"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="Height" Value="210"/>
+        </Style>
+
+        <!-- Style for Video Thumbnail Image -->
+        <Style x:Key="Thumbnail" TargetType="Image">
+            <Setter Property="Width" Value="200"/>
+            <Setter Property="Height" Value="112.5"/>
+            <Setter Property="Stretch" Value="UniformToFill"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <!-- Style for Buttons -->
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="BorderElement"
+                            CornerRadius="8"
+                            Background="#1c1c1c"
+                            BorderBrush="#FF9A2E"
+                            BorderThickness="1">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- Trigger for Mouse Hover -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BorderElement" Property="Background" Value="#FF9A2E"/>
+                                <Setter TargetName="BorderElement" Property="BorderBrush" Value="#FF9A2E"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Style for TextBlocks -->
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Poppins"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#C9C9C9"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <!-- Style for ScrollViewer Scrollbars -->
+        <Style TargetType="{x:Type ScrollViewer}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <ScrollContentPresenter Grid.Column="0"/>
+                            <!-- Vertical ScrollBar -->
+                            <ScrollBar Grid.Column="1"
+                                   Opacity="0.5"
+                                   Name="PART_VerticalScrollBar"
+                                   Value="{TemplateBinding VerticalOffset}"
+                                   Maximum="{TemplateBinding ScrollableHeight}"
+                                   ViewportSize="{TemplateBinding ViewportHeight}"
+                                   Width="10"
+                                   MinWidth="10"
+                                   Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+                            <!-- Horizontal ScrollBar -->
+                            <ScrollBar Name="PART_HorizontalScrollBar"
+                                   Opacity="0.5"
+                                   Orientation="Horizontal"
+                                   Grid.Row="1"
+                                   Grid.Column="0"
+                                   Height="10"
+                                   MinHeight="10"
+                                   Value="{TemplateBinding HorizontalOffset}"
+                                   Maximum="{TemplateBinding ScrollableWidth}"
+                                   ViewportSize="{TemplateBinding ViewportWidth}"
+                                   Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <!-- Style for a YouTube-like Button -->
+        <Style x:Key="YouTubeButtonStyle" TargetType="Border">
+            <Setter Property="Background" Value="#FF9a2e"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#FF9a2E" 
+                                      Direction="0" 
+                                      ShadowDepth="0" 
+                                      BlurRadius="50"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="TextBlock.Foreground" Value="White"/>
+            <Setter Property="TextBlock.FontWeight" Value="Bold"/>
+            <Setter Property="TextBlock.HorizontalAlignment" Value="Center"/>
+            <Setter Property="TextBlock.VerticalAlignment" Value="Center"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
+
+
+    <!--MAIN-->
+    <Border CornerRadius="20" 
+            Background="#1C1C1C" 
+            BorderBrush="#ff9a2e" 
+            BorderThickness="5"
+            Padding="5">
+
+        <Grid>
+            <!-- Main Background Color -->
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
+                    <GradientStop Color="#1c1c1c" Offset="0" />
+                    <GradientStop Color="#222222" Offset="1" />
+                </LinearGradientBrush>
+            </Grid.Background>
+
+
+            <!-- ROW DEFINITIONS -->
+            <Grid.RowDefinitions>
+                <!-- Header Row -->
+                <RowDefinition Height="50"/>
+                <!-- Main Content Row -->
+                <RowDefinition/>
+                <!-- Footer Row -->
+                <RowDefinition Height="25"/>
+            </Grid.RowDefinitions>
+
+
+            <!-- ROW 0 - HEADER START -->
+            <Grid MouseDown="header_drag" Background="Transparent" Grid.Row="0" Margin="5">
+
+                <!--Header Hrid-->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="75"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="75"/>
+                </Grid.ColumnDefinitions>
+
+                <!--Linked LearnRevitAPI Logo-->
+                <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Hyperlink NavigateUri="https://www.learnrevitapi.com" 
+                               TextDecorations="None"
+                               RequestNavigate="Hyperlink_RequestNavigate">
+                        <Image x:Name="logoImage"
+                               Source="https://framerusercontent.com/images/LRmkkOk8c7TWErBSS6H9jhFklU.png"
+                               Height="50" Width="200"
+                               Stretch="Uniform"
+                               RenderTransformOrigin="0.5,0.5">
+                            <Image.RenderTransform>
+                                <ScaleTransform x:Name="imageScaleTransform"/>
+                            </Image.RenderTransform>
+                            <Image.Triggers>
+                                <EventTrigger RoutedEvent="Image.MouseEnter">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="imageScaleTransform"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="0.9" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="imageScaleTransform"
+                                                             Storyboard.TargetProperty="ScaleY"
+                                                             To="0.9" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                                <EventTrigger RoutedEvent="Image.MouseLeave">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="imageScaleTransform"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="1.0" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="imageScaleTransform"
+                                                             Storyboard.TargetProperty="ScaleY"
+                                                             To="1.0" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Image.Triggers>
+                        </Image>
+                    </Hyperlink>
+                </TextBlock>
+
+                <!--Close Button-->
+                <Button Content="Close"
+                        Grid.Column="2"
+                        Width="60" Height="20"
+                        Margin="0,0,10,0"
+                        FontSize="10"
+                        Click="button_close"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Right"
+                        Background="Transparent" Foreground="White" BorderBrush="Transparent"/>
+
+            </Grid>
+            <!-- ROW 0 - HEADER START-->
+
+
+            <!-- ROW 1 - MAIN SECTION START-->
+            <StackPanel Margin="10" Grid.Row="1" HorizontalAlignment="Center">
+
+
+
+                <!-- Rounded Card Title -->
+                <DockPanel HorizontalAlignment="Center">
+
+                    <Border Background="#393939" CornerRadius="7" Padding="5" Margin="10" 
+                            BorderBrush="#FF9a2E" BorderThickness="0" RenderTransformOrigin="0.5,0.5">
+
+                        <Border.RenderTransform>
+                            <RotateTransform Angle="3"/>
+                        </Border.RenderTransform>
+
+                        <DockPanel>
+                            <!-- Title Text with Hyperlink -->
+                            <TextBlock Text="Revit API Tutorials"
+                                            FontSize="28"
+                                            FontWeight="Bold"
+                                            Foreground="#FF9A2E"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Left">
+
+
+                            </TextBlock>
+
+                            <!-- Image with Animation -->
+                        </DockPanel>
+                    </Border>
+
+
+
+                    <!-- Title Text with Hyperlink -->
+                    <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center">
+                            <Hyperlink NavigateUri="https://learnrevitapi.com/pyrevit-starter-kit" 
+                                       TextDecorations="None"
+                                       RequestNavigate="Hyperlink_RequestNavigate"/>
+                    </TextBlock>
+                </DockPanel>
+
+
+                <TextBlock  Text="Scroll Down to See More!" 
+                            Grid.Column="1"
+                            FontSize="14"        Foreground="#95999D" Opacity="1"
+                            TextWrapping="Wrap"   Grid.Row="2"
+                            VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                <!-- Additional Information -->
+                <Border Background="#222222" CornerRadius="10" Padding="10" Margin="10" Width="650">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#FFCE7A" 
+                          Direction="0" 
+                          ShadowDepth="0" 
+                          Opacity="1" 
+                          BlurRadius="50"/>
+                    </Border.Effect>
+
+                    <!-- MAIN CONTENT -->
+                    <ScrollViewer Grid.Row="1" Margin="10" Height="460">
+                        <StackPanel>
+                            <!-- Example content for scrolling -->
+                            <UniformGrid Columns="2" HorizontalAlignment="Center" VerticalAlignment="Top">
+
+                                <!-- EF-pyRevit StarterKit -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/sNVYFyF5biI/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Introducting: EF-pyRevit StarterKit" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                        <Hyperlink NavigateUri="https://youtu.be/sNVYFyF5biI" RequestNavigate="Hyperlink_RequestNavigate">
+                                            <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                        </Hyperlink>
+                                    </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+
+                                <!-- Revit API Documentation for Beginners -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/zphX6y73F9g/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Revit API Documentation for Beginners" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                        <Hyperlink NavigateUri="https://www.youtube.com/watch?v=zphX6y73F9g" RequestNavigate="Hyperlink_RequestNavigate">
+                                            <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                        </Hyperlink>
+                                    </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Revit API Resources you didn't know about -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/_EtmCt34Qas/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Revit API Resources you didn't know about" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=_EtmCt34Qas" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+
+                                <!-- How I’d Learn Revit API in 2024 (If I Could Start Over) -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/DXtUBU-Npc0/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="How I’d Learn Revit API in 2024" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=DXtUBU-Npc0" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Revit API Events and pyRevit Hooks Explained -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/tfEQAv36EaM/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Revit API Events and pyRevit Hooks Explained" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=tfEQAv36EaM" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Feeling Stuck Learning Revit API? -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/5gf4Cb9KnbE/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Feeling Stuck Learning Revit API?" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=5gf4Cb9KnbE" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Revit API: Automate Sections for Windows -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/SBEy55iLPAg/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Revit API: Automate Sections for Windows" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=SBEy55iLPAg" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Python Basics for Revit Users -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/i_6VbUkUf5c/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Python Basics for Revit Users" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=i_6VbUkUf5c" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- py3 Packages-->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/-r-HSIC6wf8/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="pyRevit: How to import Numpy, Pandas..." FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                    <Hyperlink NavigateUri="https://www.youtube.com/watch?v=-r-HSIC6wf8" RequestNavigate="Hyperlink_RequestNavigate">
+                                        <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                    </Hyperlink>
+                                </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- How to convert Coordinates with Revit API -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/82oKVTaN3-o/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Revit API: Convert Coordinates" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=82oKVTaN3-o" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- pyRevit Linkify-->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/lbH9oQgu0ho/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="pyRevit Tutorial: Linkify Forms" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=lbH9oQgu0ho" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Create ViewFilter -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/7ReAbu0cF7c/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Revit API: Create ViewFilter" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=7ReAbu0cF7c" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Setup Revit API Autocomplete in VS Code -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/N6colO7rPWo/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Setup Revit API Autocomplete in VS Code" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=N6colO7rPWo" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+
+
+                                <!-- Revit API: How to use ElementParameterFilter -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/GV1nwVtuCjA/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Revit API: How to use ElementParameterFilter" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=GV1nwVtuCjA" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+
+                                <!-- pyRevit Script Template for beginners -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/sJcn6qZOBGI/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="pyRevit Script Template for beginners" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=sJcn6qZOBGI" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Dynamo vs pyRevit - Compare Revit API Syntax -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/qNu6uXTDVPY/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Dynamo vs pyRevit - Compare Revit API Syntax" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=qNu6uXTDVPY" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+
+                                <!-- What is Revit API? -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/O9Xt6iUynvw/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="What is Revit API?" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=O9Xt6iUynvw" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 7 Steps to Get Started with Revit API -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/uo7IISSVTRs/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="7 Steps to Get Started with Revit API" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=uo7IISSVTRs" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- How to use Revit API with Python and pyRevit -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/HGKpwmBsD1Y/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="How to use Revit API with Python" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=HGKpwmBsD1Y" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Parameters in Revit API -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/YoLxucuC6Ss/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Parameters in Revit API " FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=YoLxucuC6Ss" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+
+
+                                <!-- Revit Lookup for Beginners -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/BAGIsICpIic/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="Revit Lookup for Beginners" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=BAGIsICpIic" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+
+                                <!-- How to use Chat GPT for Revit API Development -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/86xNmm-JAV4/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="How to use Chat GPT for Revit API Development" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=86xNmm-JAV4" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- How to Create Elements in RevitAPI -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/nuAGpVDoXio/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="How to Create Elements in RevitAPI" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=nuAGpVDoXio" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+
+                                <!-- Revit API FilteredElementCollector Tutorial -->
+                                <Border Style="{StaticResource EF_card}">
+                                    <StackPanel>
+                                        <Image Source="https://i.ytimg.com/vi/MfJTPIOo7nY/maxresdefault.jpg" VerticalAlignment="Center" Style="{StaticResource Thumbnail}"/>
+                                        <TextBlock Text="How to Create Elements in RevitAPI" FontSize="16" FontWeight="Bold" Foreground="White" Margin="15,0,15,0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <Hyperlink NavigateUri="https://www.youtube.com/watch?v=MfJTPIOo7nY" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="Watch Here" Margin="0,10,0,0" FontSize="16" FontWeight="Bold" Foreground="#FF9A2E"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+
+                                <!-- Repeat the Border content as needed -->
+                            </UniformGrid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+
+
+                <Border Style="{StaticResource YouTubeButtonStyle}" Margin="0,10,0,0">
+                    <TextBlock>
+                <Hyperlink NavigateUri="https://www.youtube.com/c/erikfrits" 
+                           TextDecorations="None"
+                           Foreground="#1c1c1c"
+                           RequestNavigate="Hyperlink_RequestNavigate">
+                    Watch More on YouTube
+                </Hyperlink>
+                    </TextBlock>
+                </Border>
+
+
+
+            </StackPanel>
+            <!-- ROW 1 - MAIN SECTION END-->
+
+
+            <!--ROW 2 - FOOTER START-->
+            <TextBlock  Text="StarterKit Version: 1.0" 
+                            Grid.Column="1"
+                            FontSize="14"        Foreground="#95999D" Opacity="0.6"
+                            TextWrapping="Wrap"   Grid.Row="2"
+                            VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <!--ROW 2 - FOOTER END-->
+
+
+        </Grid>
+    </Border>
+</Window>

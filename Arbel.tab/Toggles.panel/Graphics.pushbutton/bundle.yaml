@@ -1,0 +1,14 @@
+script:
+    file: script.py
+states:
+    - {name: "on", icon: "on-icon.png"}
+    - {name: "off", icon: "off-icon.png"}
+state_behavior:
+    default_state: off
+
+title:
+  en_us: Toggle Graphics
+tooltip:
+  
+  en_us: Toggle Graphics on/off for orphaned elements.
+author: 'Arbel Tal'

@@ -1,0 +1,19 @@
+num,WorksetName
+01,E_000_Shared Levels & Grids
+02,E_002_Coordination Mark
+03,E_010_Power Distribution
+04,E_020_Communication
+05,E_030_Lighting
+06,E_040_Mutlimedia
+07,E_050_BMS
+08,E_060_Security
+09,E_070_Spaces
+10,E_080_Shafts & Openings
+11,E_100_A Link
+12,E_200_S Link
+13,E_300_H Link
+14,E_400_P Link
+15,E_600_K Link
+16,E_700_L Link
+17,E_800_W Link
+18,E_900_CM Link
