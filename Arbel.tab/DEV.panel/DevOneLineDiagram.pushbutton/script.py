@@ -25,191 +25,365 @@ Last Updates:
 ________________________________________________________________
 Author: Arbel Tal"""
 
-# ╦╔╦╗╔═╗╔═╗╦═╗╔╦╗╔═╗
-# ║║║║╠═╝║ ║╠╦╝ ║ ╚═╗
-# ╩╩ ╩╩  ╚═╝╩╚═ ╩ ╚═╝
-#==================================================
-# -*- coding: utf-8 -*-
-from pyrevit import revit, DB, forms
+# Import necessary modules from Revit API and pyRevit
+from Autodesk.Revit.DB import (
+    FilteredElementCollector,
+    BuiltInCategory,
+    Transaction,
+    Line,
+    XYZ,
+    Plane,
+    SketchPlane,
+    ViewDrafting,
+    ViewFamilyType,
+    FamilySymbol,
+    ElementId,
+    TextNote,
+    TextNoteType,
+    ViewFamily,
+    Level,
+    TextNoteOptions
+)
+from Autodesk.Revit.UI import TaskDialog
+from pyrevit import revit, forms
+import math
+import logging
 import os
-from Autodesk.Revit.DB import OpenOptions, ModelPathUtils, StorageType, Transaction, IFamilyLoadOptions
 
-#.NET Imports
-import clr
-clr.AddReference('System')
-from System.Collections.Generic import List
-
-
-# ╦  ╦╔═╗╦═╗╦╔═╗╔╗ ╦  ╔═╗╔═╗
-# ╚╗╔╝╠═╣╠╦╝║╠═╣╠╩╗║  ║╣ ╚═╗
-#  ╚╝ ╩ ╩╩╚═╩╩ ╩╚═╝╩═╝╚═╝╚═╝
-#==================================================
-
-# Initialize document
-uidoc = __revit__.ActiveUIDocument
-doc = uidoc.Document
-app = __revit__.Application  # Access Revit application object
-
-
-# Custom FamilyLoadOptions to handle existing families
-class FamilyLoadOptions(IFamilyLoadOptions):
-    def OnFamilyFound(self, familyInUse, overwriteParameterValues):
-        # Always return True to overwrite existing families
-        overwriteParameterValues = True
-        return True
-
-    def OnSharedFamilyFound(self, sharedFamily, familyInUse, source, overwriteParameterValues):
-        # Overwrite shared families
-        overwriteParameterValues = True
-        return True
-
-
-# Function to retrieve the version parameter value from a family in the project
-def get_version_parameter_from_project(family):
-    version = None
-    family_symbol_ids = family.GetFamilySymbolIds()
-
-    for symbol_id in family_symbol_ids:
-        symbol = doc.GetElement(symbol_id)  # Get the family type (symbol)
-        version_param = symbol.LookupParameter("Version")
-
-        # Check if 'Version' parameter exists and is of integer type
-        if version_param and version_param.StorageType == DB.StorageType.Integer:
-            version = version_param.AsInteger()
-            break  # Return the first found "Version" value
-
-    return version
-
-
-# New Function to retrieve the version parameter from a family file
-def get_family_version(family_path):
-    """
-    This function takes a family file path and returns the "Version" parameter value as an integer.
-
-    Args:
-        family_path (str): Path to the family file.
-
-    Returns:
-        int: Version value of the family type (if found), or None if not found or invalid.
-    """
-
-    if not family_path or not os.path.exists(family_path):
-        return None
-
-    # Initialize Revit document
-    uidoc = __revit__.ActiveUIDocument
-    app = __revit__.Application
-
-    # Create a Revit document object from the selected family file without loading into project
-    model_path = ModelPathUtils.ConvertUserVisiblePathToModelPath(family_path)
-    open_opts = OpenOptions()  # Options for opening a family file
-    family_doc = app.OpenDocumentFile(model_path, open_opts)
-
-    version_value = None
-
-    try:
-        # Open a transaction to interact with the family file
-        with revit.Transaction('Read Family Version', doc=family_doc):
-            # Check if the document contains family
-            family_mgr = family_doc.FamilyManager
-
-            if family_mgr:
-                # Loop through family types
-                family_types = family_mgr.Types
-                for fam_type in family_types:
-                    # Set the current type to access its parameters
-                    family_mgr.CurrentType = fam_type
-
-                    # Loop through parameters to find "Version"
-                    for param in family_mgr.GetParameters():
-                        if param.Definition.Name == "Version" and param.StorageType == StorageType.Integer:
-                            version_value = family_mgr.CurrentType.AsInteger(param)
-                            break  # Exit inner loop once version is found
-                    else:
-                        print(
-                            "Family Type: {0}, 'Version' parameter not found or not an integer.".format(fam_type.Name))
-
-    except Exception as e:
-        print("Error getting family version: {0}".format(e))
-    finally:
-        # Close the family document
-        family_doc.Close(False)
-
-    return version_value
-
-
-# Step 1: Collect all families currently loaded in the project
-collector = DB.FilteredElementCollector(doc).OfClass(DB.Family)
-project_families = {fam.Name: fam for fam in collector}
-
-# Step 2: Prompt the user to select a folder containing families
-selected_folder = forms.pick_folder(title="Select Folder with Families")
-if not selected_folder:
-    forms.alert("No folder selected. Exiting.", exitscript=True)
-
-# Step 3: Get all family files in the folder (only .rfa files)
-family_files = [f for f in os.listdir(selected_folder) if f.endswith('.rfa')]
-
-# List to store family comparison information
-family_comparison = []
-
-# Step 4: Compare project families and families from the folder
-for family_file in family_files:
-    family_path = os.path.join(selected_folder, family_file)
-
-    # Get the family version from the file
-    file_version = get_family_version(family_path)
-
-    # If the family is already in the project
-    family_name = os.path.splitext(family_file)[0]
-    if family_name in project_families:
-        # Get version parameter from the project
-        project_family = project_families[family_name]
-        project_version = get_version_parameter_from_project(project_family)
-
-        # Format versions as strings for display
-        project_version_str = str(project_version) if project_version is not None else "N/A"
-        file_version_str = str(file_version) if file_version is not None else "N/A"
-
-        # Add the family comparison data to the list with a clear "[DIFFERENT]" prefix for version differences
-        if project_version != file_version:
-            display_name = "[DIFFERENT] {} (Project Version: {}, Folder Version: {})".format(
-                family_name, project_version_str, file_version_str)
-        else:
-            display_name = "{} (Project Version: {}, Folder Version: {})".format(
-                family_name, project_version_str, file_version_str)
-
-        family_comparison.append((display_name, family_path))  # Store display name and file path for selected families
-
-# Step 5: Show a multi-selection UI to the user with family names and version comparison
-selected_families_comparison = forms.SelectFromList.show(
-    [display[0] for display in family_comparison],  # Show only display names
-    title="Compare SN_Families Versions",
-    multiselect=True
+# Configure logging
+LOG_FILENAME = os.path.join(forms.documents_path(), 'OneLineDiagram.log')
+logging.basicConfig(
+    filename=LOG_FILENAME,
+    filemode='w',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# Step 6: If families were selected, update them in the project
-if selected_families_comparison:
-    # Get the selected family paths for updating
-    selected_families_paths = [
-        family_comparison[i][1] for i, display_name in enumerate([display[0] for display in family_comparison])
-        if display_name in selected_families_comparison
-    ]
+# Define default constants
+DEFAULT_PANEL_PREFIX = 'SN_'
+DEFAULT_VIEW_NAME = 'One-Line Diagram'
+DEFAULT_SPACING_X = 20  # Base horizontal spacing
+DEFAULT_SPACING_Y = 10  # Base vertical spacing
 
-    # Start a transaction to load the selected families into the project
-    with Transaction(doc, 'Load Selected Families') as t:
-        t.Start()
-        for family_path in selected_families_paths:
-            try:
-                # Use custom FamilyLoadOptions to overwrite existing families
-                family_loaded = doc.LoadFamily(family_path, FamilyLoadOptions())
+def get_electrical_panels(doc, prefix):
+    """
+    Collects all electrical panels in the document with the specified prefix.
+    """
+    try:
+        panels = FilteredElementCollector(doc) \
+            .OfCategory(BuiltInCategory.OST_ElectricalEquipment) \
+            .WhereElementIsNotElementType() \
+            .ToElements()
+        filtered_panels = [panel for panel in panels if panel.Name.startswith(prefix)]
+        logging.info(f"Collected {len(filtered_panels)} panels with prefix '{prefix}'.")
+        return filtered_panels
+    except Exception as e:
+        logging.error(f"Error collecting electrical panels: {e}")
+        raise
 
-                if family_loaded:
-                    print("Successfully updated family from: {0}".format(family_path))
-                else:
-                    print("Failed to load family from: {0}".format(family_path))
-            except Exception as e:
-                print("Error loading family: {0}, Error: {1}".format(family_path, e))
-        t.Commit()
+def get_panel_level(panel):
+    """
+    Retrieves the level associated with the panel.
+    """
+    try:
+        level_id = panel.LevelId
+        level = panel.Document.GetElement(level_id)
+        return level
+    except Exception as e:
+        logging.error(f"Error retrieving level for panel {panel.Id}: {e}")
+        return None
 
-    forms.alert("Selected families have been updated.")
+def group_panels_by_level(panels):
+    """
+    Groups panels based on their levels.
+    """
+    level_panel_map = {}
+    for panel in panels:
+        level = get_panel_level(panel)
+        if level:
+            if level.Id not in level_panel_map:
+                level_panel_map[level.Id] = {'level': level, 'panels': []}
+            level_panel_map[level.Id]['panels'].append(panel)
+    return level_panel_map
+
+def get_panel_connections(panel):
+    """
+    Retrieves connected elements (circuits) for a given electrical panel.
+    """
+    connections = []
+    try:
+        electrical_systems = getattr(panel.MEPModel, 'ElectricalSystems', None)
+        if electrical_systems:
+            for system in electrical_systems:
+                connections.extend([elem for elem in system.Elements if elem.Id != panel.Id])
+        return connections
+    except Exception as e:
+        logging.error(f"Error retrieving connections for panel {panel.Id}: {e}")
+        return connections
+
+def create_drafting_view(doc, view_name):
+    """
+    Creates a new drafting view for the one-line diagram or retrieves it if it exists.
+    """
+    try:
+        existing_view = next((v for v in FilteredElementCollector(doc)
+                              .OfClass(ViewDrafting)
+                              .ToElements()
+                              if v.Name == view_name), None)
+        if existing_view:
+            logging.info(f"Using existing drafting view '{view_name}'.")
+            return existing_view
+
+        # Get a ViewFamilyType for drafting views
+        view_family_type = next((vft for vft in FilteredElementCollector(doc)
+                                 .OfClass(ViewFamilyType)
+                                 .ToElements()
+                                 if vft.ViewFamily == ViewFamily.Drafting), None)
+        if not view_family_type:
+            raise Exception("No ViewFamilyType found for Drafting views.")
+
+        with Transaction(doc, 'Create Drafting View') as t:
+            t.Start()
+            drafting_view = ViewDrafting.Create(doc, view_family_type.Id)
+            drafting_view.Name = view_name
+            t.Commit()
+
+        logging.info(f"Created new drafting view '{view_name}'.")
+        return drafting_view
+    except Exception as e:
+        logging.error(f"Error creating drafting view: {e}")
+        raise
+
+def pick_panel_symbol(doc):
+    """
+    Lets the user pick a detail item family to use for panel symbols.
+    """
+    try:
+        # Collect all detail item families
+        detail_items = list(FilteredElementCollector(doc)
+                            .OfCategory(BuiltInCategory.OST_DetailComponents)
+                            .WhereElementIsElementType()
+                            .ToElements())
+        if not detail_items:
+            forms.alert(
+                msg="No Detail Components found in the project.",
+                title="No Symbols Available",
+                warn_icon=True
+            )
+            logging.warning("No Detail Components available.")
+            return None
+
+        # Create a dictionary of family symbols
+        detail_items_dict = {}
+        for item in detail_items:
+            key = f"{item.Family.Name} - {item.Name}"
+            detail_items_dict[key] = item
+
+        # Prompt the user to select a family type
+        selected_item_name = forms.SelectFromList.show(
+            sorted(detail_items_dict.keys()),
+            title="Select Panel Symbol",
+            button_name="Select",
+            multiselect=False
+        )
+
+        if not selected_item_name:
+            logging.info("User canceled symbol selection.")
+            return None
+
+        selected_symbol = detail_items_dict.get(selected_item_name)
+        logging.info(f"Selected panel symbol: {selected_item_name}")
+        return selected_symbol
+    except Exception as e:
+        logging.error(f"Error selecting panel symbol: {e}")
+        raise
+
+def get_user_input():
+    """
+    Prompts the user for configuration options.
+    """
+    try:
+        components = [
+            forms.Label('Enter Panel Name Prefix:'),
+            forms.TextBox('prefix', Text=DEFAULT_PANEL_PREFIX),
+
+            forms.Label('Enter Drafting View Name:'),
+            forms.TextBox('view_name', Text=DEFAULT_VIEW_NAME),
+
+            forms.Label('Enter Horizontal Spacing:'),
+            forms.TextBox('spacing_x', Text=str(DEFAULT_SPACING_X)),
+
+            forms.Label('Enter Vertical Spacing:'),
+            forms.TextBox('spacing_y', Text=str(DEFAULT_SPACING_Y)),
+        ]
+
+        # Display the form
+        response = forms.Dialog.show(components, title='One-Line Diagram Configuration')
+
+        if response:
+            prefix = response['prefix']
+            view_name = response['view_name']
+            spacing_x = float(response['spacing_x'])
+            spacing_y = float(response['spacing_y'])
+            logging.info("User provided custom configuration.")
+            return prefix, view_name, spacing_x, spacing_y
+        else:
+            logging.info("User canceled configuration.")
+            return None
+    except Exception as e:
+        logging.error(f"Error getting user input: {e}")
+        raise
+
+def arrange_layout_by_level(level_panel_map, spacing_x, spacing_y):
+    """
+    Arranges panel positions grouped by levels.
+    """
+    layout = {}
+    current_x = 0
+    current_y = 0
+
+    for level_info in sorted(level_panel_map.values(), key=lambda x: x['level'].Elevation):
+        level = level_info['level']
+        panels = level_info['panels']
+
+        # Place level label
+        layout[level.Id] = {'position': XYZ(current_x, current_y, 0), 'type': 'level', 'name': level.Name}
+        current_y -= spacing_y * 2  # Move down for panels
+
+        for panel in panels:
+            layout[panel.Id] = {'position': XYZ(current_x, current_y, 0), 'type': 'panel', 'panel': panel}
+            current_x += spacing_x
+
+        # Reset x-position and move down for the next level
+        current_x = 0
+        current_y -= spacing_y * 3  # Additional spacing between levels
+
+    logging.info("Layout arranged based on levels.")
+    return layout
+
+def generate_one_line_diagram(doc, view, layout, symbol, sketch_plane):
+    """
+    Generates the one-line diagram by placing panel symbols and drawing connections.
+    """
+    try:
+        # Activate symbol before the transaction
+        if not symbol.IsActive:
+            with Transaction(doc, 'Activate Panel Symbol') as t:
+                t.Start()
+                symbol.Activate()
+                t.Commit()
+
+        with Transaction(doc, 'Generate One-Line Diagram') as t:
+            t.Start()
+            panel_instances = {}
+            # Place elements
+            for item_id, item_info in layout.items():
+                position = item_info['position']
+                if item_info['type'] == 'level':
+                    # Place level label
+                    text_note_type = FilteredElementCollector(doc).OfClass(TextNoteType).FirstElement()
+                    text_note = TextNote.Create(
+                        doc,
+                        view.Id,
+                        position,
+                        item_info['name'],
+                        text_note_type.Id
+                    )
+                elif item_info['type'] == 'panel':
+                    panel = item_info['panel']
+                    instance = doc.Create.NewFamilyInstance(position, symbol, view)
+                    panel_instances[panel.Id] = instance
+
+            # Draw connection lines
+            for item_info in layout.values():
+                if item_info['type'] == 'panel':
+                    panel = item_info['panel']
+                    start_pos = item_info['position']
+                    connected_panels = get_panel_connections(panel)
+                    for conn_panel in connected_panels:
+                        conn_info = layout.get(conn_panel.Id)
+                        if conn_info and conn_info['type'] == 'panel':
+                            end_pos = conn_info['position']
+                            line = Line.CreateBound(start_pos, end_pos)
+                            detail_curve = doc.Create.NewDetailCurve(view, line)
+                            detail_curve.SketchPlane = sketch_plane
+            t.Commit()
+
+        logging.info("One-line diagram generated successfully.")
+    except Exception as e:
+        logging.error(f"Error generating one-line diagram: {e}")
+        raise
+
+def main():
+    """
+    Main function to execute the one-line diagram creation process.
+    """
+    doc = revit.doc
+
+    try:
+        # Step 1: Get user input
+        user_input = get_user_input()
+        if not user_input:
+            return  # User canceled
+        prefix, view_name, spacing_x, spacing_y = user_input
+
+        # Step 2: Collect Electrical Panels
+        panels = get_electrical_panels(doc, prefix)
+        if not panels:
+            forms.alert(
+                msg=f"No electrical panels with the prefix '{prefix}' were found.",
+                title="No Panels Found",
+                warn_icon=True
+            )
+            logging.warning("No panels found with the specified prefix.")
+            return
+
+        # Step 3: Let the user pick detail item symbol
+        symbol = pick_panel_symbol(doc)
+        if not symbol:
+            logging.warning("No symbol selected by the user.")
+            return
+
+        # Step 4: Create or retrieve Drafting View
+        drafting_view = create_drafting_view(doc, view_name)
+
+        # Step 5: Group Panels by Level
+        level_panel_map = group_panels_by_level(panels)
+        if not level_panel_map:
+            forms.alert(
+                msg="No levels found for the panels.",
+                title="No Levels Found",
+                warn_icon=True
+            )
+            logging.warning("No levels associated with panels.")
+            return
+
+        # Step 6: Arrange Layout
+        layout = arrange_layout_by_level(level_panel_map, spacing_x, spacing_y)
+
+        # Step 7: Create a single SketchPlane for all connections
+        with Transaction(doc, 'Create SketchPlane') as t:
+            t.Start()
+            plane = Plane.CreateByNormalAndOrigin(XYZ.BasisZ, XYZ(0, 0, 0))
+            sketch_plane = SketchPlane.Create(doc, plane)
+            t.Commit()
+
+        # Step 8: Generate One-Line Diagram
+        generate_one_line_diagram(doc, drafting_view, layout, symbol, sketch_plane)
+
+        # Step 9: Notify the user of success
+        TaskDialog.Show("One-Line Diagram", f"One-line diagram '{view_name}' has been created successfully.")
+        logging.info("Script completed successfully.")
+
+    except Exception as e:
+        # Handle any unexpected errors
+        forms.alert(
+            msg=f"An error occurred:\n{str(e)}",
+            title="Error",
+            warn_icon=True
+        )
+        logging.error(f"An unexpected error occurred: {e}")
+
+# Execute the script
+if __name__ == "__main__":
+    main()
