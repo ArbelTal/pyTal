@@ -10,5 +10,9 @@
     "url": "https://github.com/ArbelTal/pyTal.git",
     "website": "",
     "image": "",
+    "templates": {
+        "author": "",
+        "docpath": ""
+    },
     "dependencies": []
 }
