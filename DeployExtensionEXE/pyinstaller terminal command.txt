@@ -1,0 +1,7 @@
+command template :
+----------------------------
+pyinstaller --onefile --noconsole --add-data "<Extension_Name>.extension;<Extension_Name>.extension" --hidden-import "pyperclip" deploy_extension.py
+
+change extension folder name in deploy_extension.py script :
+-----------------------------------------------------------------------
+destination_folder_name = "<Extension_Name>.extension"
