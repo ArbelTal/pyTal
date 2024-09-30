@@ -53,7 +53,7 @@ doc    = __revit__.ActiveUIDocument.Document #type:Document
 #==================================================
 
 
-print("Button 2")
+print("Button 1")
 
 #🤖 Automate Your Boring Work Here
 
