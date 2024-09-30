@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __title__   = "Button 1"
 __doc__     = """Version = 1.0
-Date    = 15.06.2024
+Date    = 30.09.2024
 ________________________________________________________________
 Description:
 
@@ -21,11 +21,10 @@ TODO:
 [FEATURE] - Describe Your ToDo Tasks Here
 ________________________________________________________________
 Last Updates:
-- [15.06.2024] v1.0 Change Description
-- [10.06.2024] v0.5 Change Description
-- [05.06.2024] v0.1 Change Description 
+- [30.09.2024] v1.0 Change Description
+
 ________________________________________________________________
-Author: Erik Frits"""
+Author: Arbel Tal"""
 
 # ╦╔╦╗╔═╗╔═╗╦═╗╔╦╗╔═╗
 # ║║║║╠═╝║ ║╠╦╝ ║ ╚═╗
@@ -54,7 +53,7 @@ doc    = __revit__.ActiveUIDocument.Document #type:Document
 #==================================================
 
 
-
+print("Button 1")
 
 #🤖 Automate Your Boring Work Here
 
@@ -63,6 +62,3 @@ doc    = __revit__.ActiveUIDocument.Document #type:Document
 
 
 #==================================================
-#🚫 DELETE BELOW
-from Snippets._customprint import kit_button_clicked    # Import Reusable Function from 'lib/Snippets/_customprint.py'
-kit_button_clicked(btn_name=__title__)                  # Display Default Print Message
