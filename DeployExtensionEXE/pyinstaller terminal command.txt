@@ -1,6 +1,11 @@
-command template :
+command (powerShell) :
 ----------------------------
-pyinstaller --onefile --noconsole --add-data "<Extension_Name>.extension;<Extension_Name>.extension" --hidden-import "pyperclip" deploy_extension.py
+pyinstaller --onefile --name pyTal deploy_extension.py
+
+command template >>> 
+----------------------------
+pyinstaller --onefile --name <extension installer name> deploy_extension.py
+
 
 change extension folder name in deploy_extension.py script :
 -----------------------------------------------------------------------
