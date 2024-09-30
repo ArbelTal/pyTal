@@ -142,7 +142,7 @@ for family_file in family_files:
 # Step 5: Show a multi-selection UI to the user with family names and version comparison
 selected_families_comparison = forms.SelectFromList.show(
     [display[0] for display in family_comparison],  # Show only display names
-    title="Compare SN_Families Versions",
+    title="Compare Project and Folder Families Versions",
     multiselect=True
 )
 
