@@ -2,6 +2,9 @@ title:
   en_us: Create Worksets
 tooltip:
   
-  en_us: Create Worksets from CSV file
+  en_us: Create Worksets from CSV file.
+        the CSV needs to have the following columns:
+        - "number"
+        - "description"
 author: 'Arbel Tal'
 
