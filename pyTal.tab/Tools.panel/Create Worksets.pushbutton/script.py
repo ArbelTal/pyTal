@@ -1,4 +1,27 @@
 """Create worksets from a list and set defautl visibility"""
+# -*- coding: utf-8 -*-
+__title__   = "Create worksets"
+__doc__     = """Version = 1.0
+Date    = 01.10.2024
+________________________________________________________________
+Description:
+
+Create Worksets from CSV file. 
+________________________________________________________________
+How-To:
+
+1. Create or pick CSV file.
+2. The CSV should contain at least one column "WorksetName".
+   Other columns are optional.
+________________________________________________________________
+TODO:
+[FEATURE] - Describe Your ToDo Tasks Here
+________________________________________________________________
+Last Updates:
+- [01.10.2024] v1.0 Change Description
+________________________________________________________________
+Author: Arbel Tal"""
+
 from Autodesk.Revit.DB import *
 from Autodesk.Revit.UI import *
 from Autodesk.Revit import DB
