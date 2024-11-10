@@ -1,9 +1,34 @@
+"""Insert Shared Parameter"""
+# -*- coding: utf-8 -*-
+__title__   = "Insert\nShared Parameter"
+__doc__     = """Version = 1.0
+Date    = 10.11.2024
+________________________________________________________________
+Description:
+Insert Shared Parameter to families in folder. 
+________________________________________________________________
+How-To:
+1. Choose shared parameter.
+2. Select folder containing families.
+3. select families to update.
+4. Select parameter group.
+5. Choose between 'type' and 'instance' for the parameter.
+________________________________________________________________
+TODO:
+________________________________________________________________
+Last Updates:
+- [01.10.2024] v1.0 Change Description
+________________________________________________________________
+Author: Arbel Tal"""
+
 from pyrevit import revit, forms, script
 from Autodesk.Revit.DB import FilteredElementCollector, BuiltInParameterGroup, SharedParameterElement, FamilyManager, \
     Transaction, IFamilyLoadOptions
+"""
 from Autodesk.Revit.ApplicationServices import Application
 from System.Collections.Generic import List
 import clr
+"""
 import os
 
 
