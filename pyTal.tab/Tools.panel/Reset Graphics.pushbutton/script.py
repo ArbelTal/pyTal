@@ -1,3 +1,17 @@
+"""Reset Graphics Overrides"""
+# -*- coding: utf-8 -*-
+__title__ = "Create worksets"
+__doc__ = """Version = 1.0
+Date    = 01.10.2024
+________________________________________________________________
+Description:
+Create Worksets from CSV file. 
+________________________________________________________________
+Last Updates:
+- [01.10.2024] v1.0 Change Description
+________________________________________________________________
+Author: Arbel Tal"""
+
 from pyrevit import revit, DB
 
 # Initialize document and active view

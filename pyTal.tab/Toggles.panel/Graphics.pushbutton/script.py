@@ -1,3 +1,25 @@
+"""Graphics"""
+# -*- coding: utf-8 -*-
+__title__   = "Insert\nShared Parameter"
+__doc__     = """Version = 1.0
+Date    = 10.11.2024
+________________________________________________________________
+Description:
+Insert Shared Parameter to families in folder. 
+________________________________________________________________
+How-To:
+1. first press (on) - color every orphan element in RED.
+2. second press (off) - reset graphics overwrites.
+________________________________________________________________
+TODO:
+________________________________________________________________
+Last Updates:
+- [10.11.2024] v1.0 Change Description
+________________________________________________________________
+Author: Arbel Tal"""
+
+
+
 import pyrevit
 from pyrevit import script, revit, forms
 import os

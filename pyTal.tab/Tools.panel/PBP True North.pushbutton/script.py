@@ -1,3 +1,17 @@
+"""PBP True North"""
+# -*- coding: utf-8 -*-
+__title__   = "PBP\nTrue North"
+__doc__     = """Version = 1.0
+Date    = 10.11.2024
+________________________________________________________________
+Description:
+Copy Project Base Point (PBP) True North angle to clipboard. 
+________________________________________________________________
+Last Updates:
+- [10.11.2024] v1.0 Change Description
+________________________________________________________________
+Author: Arbel Tal"""
+
 # Necessary imports
 from pyrevit import revit, DB, forms
 import clr
