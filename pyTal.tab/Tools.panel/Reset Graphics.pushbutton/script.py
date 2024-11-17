@@ -1,6 +1,6 @@
 """Reset Graphics Overrides"""
 # -*- coding: utf-8 -*-
-__title__ = "Create worksets"
+__title__ = "Reset\nGraphics Overrides"
 __doc__ = """Version = 1.0
 Date    = 01.10.2024
 ________________________________________________________________
