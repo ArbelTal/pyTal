@@ -1,3 +1,20 @@
+"""Select elements in phase"""
+# -*- coding: utf-8 -*-
+__title__   = "Select elements\nin phase"
+__doc__     = """Version = 1.0
+Date    = 10.11.2024
+________________________________________________________________
+Description:
+Select elements in selected phase. 
+________________________________________________________________
+
+TODO:
+________________________________________________________________
+Last Updates:
+- [01.10.2024] v1.0 Select elements in selected phase
+________________________________________________________________
+Author: Arbel Tal"""
+
 from pyrevit import revit, forms
 from Autodesk.Revit.DB import FilteredElementCollector, Phase, BuiltInParameter, BuiltInCategory, CategoryType, ElementId
 from System.Collections.Generic import List
