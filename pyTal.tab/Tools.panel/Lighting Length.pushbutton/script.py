@@ -1,6 +1,6 @@
 """Check the total length of the lighting fixtures for each family and type"""
 # -*- coding: utf-8 -*-
-__title__   = "Check the total length of the lighting fixtures for each family and type"
+__title__   = "lighting length"
 __doc__     = """Version = 1.0
 Date    = 18.12.2025
 ________________________________________________________________
