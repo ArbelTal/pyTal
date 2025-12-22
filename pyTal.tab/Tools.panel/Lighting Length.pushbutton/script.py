@@ -1,4 +1,18 @@
+"""Check the total length of the lighting fixtures for each family and type"""
 # -*- coding: utf-8 -*-
+__title__   = "lighting length"
+__doc__     = """Version = 1.0
+Date    = 18.12.2025
+________________________________________________________________
+Description:
+Check the total length of the lighting fixtures for each family and type. 
+________________________________________________________________
+How-To:
+1. Create or pick a Revit project.
+2. The script will check the total length of the lighting fixtures for each family and type.
+3. The script will print the total length of the lighting fixtures for each family and type.
+"""
+
 import math
 from Autodesk.Revit.DB import *
 from pyrevit import script
