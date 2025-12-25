@@ -1,5 +1,5 @@
 # 🧰 pyTal 🧰
-![pyTal](https://github.com/ArbelTal/pyTal/blob/main/pyTal%20Overview.PNG?raw=true)
+https://github.com/ArbelTal/pyTal/blob/main/pyTal%20Overview.PNG
 
 Developed by **Arbel Tal**  
 
