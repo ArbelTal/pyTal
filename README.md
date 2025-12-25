@@ -4,7 +4,7 @@
 
 Developed by **Arbel Tal**  
 
-🧰 pyTal is a FREE pyRevit extension that contains tools that shouldimprove your workflow.
+🧰 pyTal is a FREE pyRevit extension that contains tools that should improve your workflow.
 
 ---
 
