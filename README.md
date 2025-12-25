@@ -10,7 +10,7 @@ Developed by **Arbel Tal**
 
 ### 📦 Revit Versions 📦
 
-These tools are mainly developed for Revit 2022-2023.
+These tools are mainly developed for Revit 2022-2026.
 
 ---
 
