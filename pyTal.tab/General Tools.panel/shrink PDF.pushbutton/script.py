@@ -69,14 +69,23 @@ def main():
     # Map friendly names to (DPI, Quality)
     profiles = {
         "High Quality (Printer)": (300, 90),
-        "Standard (Ebook/Office)": (144, 75),
+        "Medium Quality (Ebook/Office)": (144, 75),
         "Low Quality (Screen/Email)": (72, 60)
     }
     
+    # User requested specific order
+    options = [
+        "Low Quality (Screen/Email)",
+        "Medium Quality (Ebook/Office)",
+        "High Quality (Printer)"
+    ]
+    
     selected_name = forms.SelectFromList.show(
-        sorted(profiles.keys()),
+        options,
         title='Select Compression Level',
-        button_name='Compress'
+        button_name='Compress',
+        width=300,
+        height=220
     )
     
     if not selected_name:
