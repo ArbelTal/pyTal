@@ -1,18 +1,20 @@
 """PBP True North"""
 # -*- coding: utf-8 -*-
 __title__   = "PBP\nTrue North"
-__doc__     = """Version = 1.0
-Date    = 10.11.2024
+__doc__     = """Version = 1.1
+Date    = 27.09.2026
 ________________________________________________________________
 Description:
 Copy Project Base Point (PBP) True North angle to clipboard. 
 ________________________________________________________________
 Last Updates:
+- [27.09.2026] v1.1 Compatibility with Revit 2024-2026+ (ElementId.Value / 64-bit ElementId)
 - [10.11.2024] v1.0 Change Description
 ________________________________________________________________
 Author: Arbel Tal"""
 
 # Necessary imports
+import math
 from pyrevit import revit, DB, forms
 import clr
 
@@ -31,17 +33,16 @@ def get_pbp_id(doc):
 
     # Check if any Project Base Points were found
     if base_points:
-        # Return the first found Project Base Point ID
-        for base_point in base_points:
-            return base_point.Id.IntegerValue  # Return the PBP element ID as an integer
-    else:
-        # If no PBP is found, return None
-        return None
+        return base_points[0].Id
+    return None
 
 # Function to get the Angle to True North for a specific PBP element
 def get_pbp_angle_to_true_north(doc, pbp_id):
-    # Retrieve the Project Base Point element by its ID
-    element_id = DB.ElementId(pbp_id)
+    if not pbp_id:
+        return None
+
+    # Retrieve the Project Base Point element by its ID (support both ElementId and int/Int64)
+    element_id = pbp_id if isinstance(pbp_id, DB.ElementId) else DB.ElementId(pbp_id)
     pbp_element = doc.GetElement(element_id)
 
     if pbp_element:
@@ -58,23 +59,17 @@ def get_pbp_angle_to_true_north(doc, pbp_id):
 
 # Function to copy PBP angle to clipboard
 def copy_pbp_angle_to_clipboard(pbp_angle):
-    angle_radians =pbp_angle
-
     if pbp_angle is not None:
-        if angle_radians is not None:
-            # Convert the angle from radians to degrees
-            #angle_degrees = angle_radians * (180.0 / 3.14159)
-            angle_degrees = round(angle_radians * (180.0 / 3.14159),2)
+        # Convert the angle from radians to degrees
+        angle_degrees = round(math.degrees(pbp_angle), 2)
 
-            # Copy the numeric value of the angle (degrees) to the clipboard
-            Clipboard.SetText(str(angle_degrees))  # Convert the number to a string before copying
+        # Copy the numeric value of the angle (degrees) to the clipboard
+        Clipboard.SetText(str(angle_degrees))  # Convert the number to a string before copying
 
-            # Notify the user
-            forms.alert("Project Base Point angle to True North copied to clipboard: {}".format(angle_degrees), title="PBP Angle Copied")
-        else:
-            forms.alert("Could not retrieve the angle to True North.", title="Error")
+        # Notify the user
+        forms.alert("Project Base Point angle to True North copied to clipboard: {}".format(angle_degrees), title="PBP Angle Copied")
     else:
-        forms.alert("Project Base Point not found.", title="Error")
+        forms.alert("Project Base Point not found or could not retrieve the angle.", title="Error")
 
 
 def my_addin():
@@ -85,4 +80,4 @@ def my_addin():
 
 
 # Run the main function
-my_addin()
+my_addin()
