@@ -1,0 +1,18 @@
+title:
+  en_us: Stretch
+tooltip:
+  en_us: |
+    Stretches 2D detail lines, Detail Items, and Generic Annotations.
+
+    HOW TO USE:
+    Step 1 - Window selection around elements to stretch:
+    • Right-to-Left (Crossing): Stretches curves/components even if only one endpoint is selected. Moves elements touching the box.
+    • Left-to-Right (Window): Stretches/moves only elements completely enclosed within the box.
+
+    Step 2 - Pick a Base Point.
+    Step 3 - Pick a Target Point.
+
+    ORTHO / F8 MODE:
+    • Shift + Click ribbon button: Opens settings to set F8 (Ortho) default (icon turns ORANGE when active).
+    • Hold Shift while picking target: Toggles Ortho mode on-the-fly (locks to horizontal/vertical).
+author: 'Arbel Tal'
